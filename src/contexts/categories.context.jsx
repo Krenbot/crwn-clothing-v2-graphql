@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import { gql, useQuery } from '@apollo/client'
+import { gql, useMutation, useQuery } from '@apollo/client'
 
 export const CategoriesContext = createContext({
   categoriesMap: {},
@@ -20,9 +20,28 @@ query GetCollections{
     }
 `
 
+const SET_CATEGORY = gql`
+  mutation($category: Category!){
+    addCategory(category: $category){
+      id
+      title
+      items{
+        id
+        name
+        price
+        imageUrl
+      }
+    }
+  }
+`
+
 export const CategoriesProvider = ({ children }) => {
   const { loading, error, data } = useQuery(COLLECTIONS);
   const [categoriesMap, setCategoriesMap] = useState({});
+
+  const [addCategory, { loading, error, data }] = useMutation(SET_CATEGORY)
+
+  addCategory({ variables: { category: categoryObject } })
 
   useEffect(() => {
     if (data) {
